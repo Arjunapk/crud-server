@@ -5,6 +5,8 @@ const {open} = require('sqlite')
 const sqlite3 = require('sqlite3')
 const path = require('path')
 const {v4} = require('uuid')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const app = express();
 
@@ -30,6 +32,41 @@ const initializeDBANDServer = async () => {
 initializeDBANDServer()
 
 app.get("/", (request, response) => response.send(JSON.stringify("Hello from Express")))
+
+app.post("/signup", async (request, response) => {
+    const {username, password} = request.body
+    const getUserQuery = `SELECT * FROM users WHERE username='${username}'`
+    const user = await database.get(getUserQuery)
+    if (user === undefined) {
+        const encryptPassword = await bcrypt.hash(password, 5)
+        const createUserQuery = `INSERT INTO users (username, password) VALUES ('${username}', '${encryptPassword}')`    
+        await database.run(createUserQuery)
+        response.send(JSON.stringify("User created successfully"))
+    } else {
+        response.status = 400
+        response.send(JSON.stringify("Username already exits"))
+    }
+})
+
+app.post("/login", async (request, response) => {
+    const {username, password} = request.body
+    const getUserQuery = `SELECT * FROM users WHERE username='${username}'`
+    const user = await database.get(getUserQuery)
+    if (user === undefined) {
+        response.status = 400
+        response.send(JSON.stringify("Invalid User"))
+    } else {
+        const isPasswordMatched = await bcrypt.compare(password, user.password)
+        if (isPasswordMatched) {
+            const payload = {username}
+            const jwtToken = jwt.sign(payload, "password")
+            response.send({jwtToken})
+        } else {
+            response.status = 400
+            response.send(JSON.stringify("Invalid Password"))
+        }
+    }
+})
 
 app.get("/users", async (request, response) => {
     const getUserQuery = 'SELECT * FROM user_details'

@@ -1,6 +1,24 @@
 GET http://localhost:5000
 ###
 
+POST http://localhost:5000/signup
+Content-Type: application/json
+
+{
+    "username": "apkarjun",
+    "password": "apk"
+}
+###
+
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+    "username": "apkarjun",
+    "password": "apk"
+}
+###
+
 GET http://localhost:5000/users
 ###
 
