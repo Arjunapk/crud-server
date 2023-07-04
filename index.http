@@ -19,7 +19,7 @@ Content-Type: application/json
 }
 ###
 
-DELETE http://localhost:5000/user/6180b7d7-5b32-493f-b33d-88d9f4494483
+DELETE http://localhost:5000/user/1
 ###
 
 PUT http://localhost:5000/user/1
